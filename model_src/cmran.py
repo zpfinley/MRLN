@@ -2,7 +2,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
-from models import Encoder_2, DecoderLayer, Decoder
+from models import Encoder, DecoderLayer, Decoder
 from torch.nn import MultiheadAttention
 
 
@@ -67,7 +67,7 @@ class New_Audio_Guided_Attention(nn.Module):
 class InternalTemporalRelationModule(nn.Module):
     def __init__(self, input_dim, d_model, dim_feedforward=2048):
         super(InternalTemporalRelationModule, self).__init__()
-        self.encoder = Encoder_2(d_model=d_model, num_layers=2, nhead=4, dim_feedforward=dim_feedforward)
+        self.encoder = Encoder(d_model=d_model, num_layers=2, nhead=4, dim_feedforward=dim_feedforward)
         self.affine_matrix = nn.Linear(input_dim, d_model)
         self.relu = nn.ReLU(inplace=True)
         # add relu here?
@@ -239,14 +239,3 @@ if __name__ == '__main__':
     num_params = count_parameters(net_model)
     print(num_params)
     print("Total Parameter: \t%2.1fM" % num_params)
-
-    from thop import profile
-    from thop import clever_format
-
-    model = net_model.float().to('cuda')
-    input1 = torch.randn(1, 10, 7, 7, 512).float().to('cuda')
-    input2 = torch.randn(1, 10, 128).float().to('cuda')
-    flops, params = profile(model, inputs=(input1, input2))
-    print("profile: ", flops, params)
-    flops, params = clever_format([flops, params], "%.3f")
-    print("clever: ", flops, params)
